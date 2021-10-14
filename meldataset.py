@@ -77,7 +77,7 @@ def mel_spectrogram(y, n_fft, num_mels, sampling_rate, hop_size, win_size, fmin,
 
 def vocoder_feature(y, n_fft, sampling_rate, hop_size, order=60):
     f0, sp, ap = pyworld.wav2world(
-        y.squeeze(1).squeeze(0)[hop_size//2:-hop_size//2].numpy().astype(np.float64),
+        y.squeeze(1).squeeze(0)[hop_size//2:-hop_size//2].cpu().numpy().astype(np.float64),
         sampling_rate,
         fft_size=n_fft,
         frame_period=(hop_size/sampling_rate*1000)
@@ -86,7 +86,7 @@ def vocoder_feature(y, n_fft, sampling_rate, hop_size, order=60):
     melcep = pysptk.sp2mc(sp, order=order, alpha=alpha)
     voc_feat = np.concatenate((np.expand_dims(f0, 1), melcep), axis=1)
 
-    return torch.from_numpy(voc_feat.astype(np.float32)).transpose(0, 1).unsqueeze(0)
+    return torch.from_numpy(voc_feat.astype(np.float32)).transpose(0, 1).unsqueeze(0).to(y.device)
 
 
 def get_dataset_filelist(a):
